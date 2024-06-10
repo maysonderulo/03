@@ -1,72 +1,53 @@
+from openai import OpenAI
 import streamlit as st
-import openai
-import math
 
-# OpenAI API 키 설정
-openai.api_key = 'your-openai-api-key'
+st.title("친근한 챗봇")
 
-st.title("OpenAI 어시스턴트와 채팅 및 코드 인터프리터")
+api_key = st.text_input("Enter your OpenAI API key", type="password")
 
-# 세션 상태 초기화
-if 'messages' not in st.session_state:
-    st.session_state['messages'] = []
+if api_key:
+    client = OpenAI(api_key=api_key)
 
-def clear_chat():
-    st.session_state['messages'] = []
+    if "openai_model" not in st.session_state:
+        st.session_state["openai_model"] = "gpt-3.5-turbo"
 
-def solve_right_triangle(hypotenuse, one_side):
-    other_side = math.sqrt(hypotenuse**2 - one_side**2)
-    angle_a = math.degrees(math.asin(one_side / hypotenuse))
-    angle_b = math.degrees(math.asin(other_side / hypotenuse))
-    angle_c = 90.0
-    return other_side, angle_a, angle_b, angle_c
+    system_message = '''
+    너의 이름은 친구봇이야.
+    너는 항상 반말을 하는 챗봇이야. 다나까나 요 같은 높임말로 절대로 끝내지 마
+    항상 반말로 친근하게 대답해줘.
+    영어로 질문을 받아도 무조건 한글로 답변해줘.
+    한글이 아닌 답변일 때는 다시 생각해서 꼭 한글로 만들어줘
+    모든 답변 끝에 답변에 맞는 이모티콘도 추가해줘
+    '''
 
-def generate_image(prompt):
-    response = openai.Image.create(
-        model="dall-e-3",
-        prompt=prompt
-    )
-    image_url = response['data'][0]['url']
-    return image_url
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-# 사용자 입력
-user_input = st.text_input("당신:", "")
+    if len(st.session_state.messages) == 0:
+        st.session_state.messages = [{"role": "system", "content": system_message}]
 
-# Clear 버튼
-if st.button("Clear"):
-    clear_chat()
+    for idx, message in enumerate(st.session_state.messages):
+        if idx > 0:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
-# 사용자 입력이 있을 경우
-if user_input:
-    st.session_state['messages'].append({"role": "user", "content": user_input})
-    
-    # 직각 삼각형 문제 풀이
-    if "직각 삼각형" in user_input and "가장 긴 변의 길이가 5 cm" in user_input and "다른 한 변의 길이가 4 cm" in user_input:
-        hypotenuse = 5
-        one_side = 4
-        other_side, angle_a, angle_b, angle_c = solve_right_triangle(hypotenuse, one_side)
-        response_message = f"다른 한 변의 길이는 {other_side:.2f} cm입니다.\n세 각의 각도는 A: {angle_a:.2f}°, B: {angle_b:.2f}°, C: {angle_c:.2f}°입니다."
-    # 이미지 생성 요청 처리
-    elif "광안대교 이미지 생성해줘" in user_input:
-        prompt = "광안대교 이미지"
-        image_url = generate_image(prompt)
-        response_message = f"광안대교 이미지가 생성되었습니다. [여기를 클릭하세요]({image_url})."
-    else:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=st.session_state['messages']
-        )
-        response_message = response['choices'][0]['message']['content']
+    if prompt := st.chat_input("What is up?"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-    st.session_state['messages'].append({"role": "assistant", "content": response_message})
+        with st.chat_message("assistant"):
+            stream = client.chat.completions.create(
+                model=st.session_state["openai_model"],
+                messages=[
+                    {"role": m["role"], "content": m["content"]}
+                    for m in st.session_state.messages
+                ],
+                stream=True,
+            )
+            response = st.write_stream(stream)
+        st.session_state.messages.append({"role": "assistant", "content": response})
+else:
+    st.info("API key를 입력해주세요.")
+#[출처] 내가 만든 Streamlit 앱 무료로 배포하기|작성자 다비드스튜디오
 
-# 대화 내용 표시
-for message in st.session_state['messages']:
-    if message['role'] == 'user':
-        st.write(f"**당신:** {message['content']}")
-    else:
-        st.write(f"**어시스턴트:** {message['content']}")
-        if "광안대교 이미지가 생성되었습니다" in message['content']:
-            image_url = message['content'].split("[여기를 클릭하세요](")[1].split(")")[0]
-            st.image(image_url)
-  
