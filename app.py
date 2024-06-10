@@ -48,12 +48,9 @@ if api_key:
             with st.chat_message("assistant"):
                 response = openai.ChatCompletion.create(
                     model=st.session_state["openai_model"],
-                    messages=[
-                        {"role": m["role"], "content": m["content"]}
-                        for m in st.session_state.messages
-                    ]
+                    messages=st.session_state.messages
                 )
-                response_content = response["choices"][0]["message"]["content"]
+                response_content = response.choices[0].message['content']
                 st.markdown(response_content)
                 st.session_state.messages.append({"role": "assistant", "content": response_content})
 
@@ -72,3 +69,5 @@ if api_key:
                 st.image(image_url, caption=prompt)
 else:
     st.info("API key를 입력해주세요.")
+      
+       
