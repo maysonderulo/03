@@ -51,3 +51,7 @@ else:
     st.info("API key를 입력해주세요.")
 #[출처] 내가 만든 Streamlit 앱 무료로 배포하기|작성자 다비드스튜디오
 
+elif page == "DALL-E Image Generator":
+    st.title("귀여운 고양이 달이의 그림판")
+    st.write("안뇽뇽, 달이양 그림이 그리고 싶으면 API키와 프롬프트를 달라냥!")
+    api_key = st.text_input("Enter your OpenAI API key", type="password")
