@@ -53,7 +53,7 @@ if api_key:
                        for m in st.session_state.messages
                ],
                stream=True,
-        )
+        
         response = st.write_stream(stream)
     st.session_state.message.append("role": "assistant", "content": response})
 else:
