@@ -12,7 +12,7 @@ api_key = st.text_input("Enter your OpenAI API key", type="password")
 
 # API 키 설정
 if api_key:
-    openai.api_key = api_key
+    openAI(api_key = api_key)
 
     if page == "친근한 챗봇":
         st.title("친근한 챗봇")
@@ -46,14 +46,19 @@ if api_key:
                 st.markdown(prompt)
 
             with st.chat_message("assistant"):
-                response = openai.ChatCompletion.create(
-                    model=st.session_state["openai_model"],
-                    messages=st.session_state.messages
-                )
-                response_content = response.choices[0].message['content']
-                st.markdown(response_content)
-                st.session_state.messages.append({"role": "assistant", "content": response_content})
-
+               stream = client.chat.completions.create(
+                   model=st.session_state["openai_model"]<
+                   messages=[
+                       {"role":m["role'], "content": m['content"]}
+                       for m in st.session_state.messages
+               ],
+               stream=True,
+        )
+        response = st.write_stream(stream)
+    st.session_state.message.append("role": "assistant", "content": response})
+else:
+    st.info("API key를 입력해주세요.")
+        
     elif page == "DALL-E 이미지 생성기":
         st.title("DALL-E 이미지 생성기")
         st.write("안뇽! 원하는 이미지 설명을 입력하면 내가 그려줄게!")
