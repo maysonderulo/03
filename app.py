@@ -47,5 +47,20 @@ if api_key:
             )
             response = st.write_stream(stream)
         st.session_state.messages.append({"role": "assistant", "content": response})
+
+    if st.button("Clear"):
+        st.session_state.messages = [{"role": "system", "content": system_message}]
+
+    if st.button("Exit Chat"):
+        del st.session_state.messages
 else:
     st.info("API key를 입력해주세요.")
+
+
+interpreter_code = st.text_area("Code Interpreter")
+
+if interpreter_code:
+    try:
+        exec(interpreter_code)
+    except Exception as e:
+        st.error(f"Error: {e}")
