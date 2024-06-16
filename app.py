@@ -1,10 +1,8 @@
 from openai import OpenAI
 import streamlit as st
 
-st.title("친근한 챗봇")
 
-api_key = st.text_input("Enter your OpenAI API key", type="password")
-
+api_key = sk-proj-yKWGbnHznn8PZbP1CAkWT3BlbkFJYxluBHJWAz70PgHY4sMC
 if api_key:
     client = OpenAI(api_key=api_key)
 
@@ -12,12 +10,8 @@ if api_key:
         st.session_state["openai_model"] = "gpt-3.5-turbo"
 
     system_message = '''
-    너의 이름은 친구봇이야.
-    너는 항상 반말을 하는 챗봇이야. 다나까나 요 같은 높임말로 절대로 끝내지 마
-    항상 반말로 친근하게 대답해줘.
-    영어로 질문을 받아도 무조건 한글로 답변해줘.
-    한글이 아닌 답변일 때는 다시 생각해서 꼭 한글로 만들어줘
-    모든 답변 끝에 답변에 맞는 이모티콘도 추가해줘
+    너는 부경대학교 학생의 학교생활을 도와주는 친절한 챗봇 '백경이'야 질문에 답을 할때 항상 반말로 해줘. 무슨일이 있어도 반말로 해줘 
+    그리고 주어진 데이터 범위의 밖의 것들은 미안하지만 모른다고 대답해야해!.
     '''
 
     if "messages" not in st.session_state:
@@ -31,7 +25,7 @@ if api_key:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-    if prompt := st.chat_input("What is up?"):
+    if prompt := st.chat_input("안녕, 나는 대학 생활을 도와주는 백경이야. 뭘 도와줄까 ?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
