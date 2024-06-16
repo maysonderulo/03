@@ -1,9 +1,11 @@
-import openai
+from openai import OpenAI
 import streamlit as st
 
 # 상수로 API 키 설정
-API_KEY = 'your-api-key-here'
-openai.api_key = API_KEY
+client = OpenAI(
+  api_key=os.environ['OPENAI_API_KEY'],  # this is also the default, it can be omitted
+)
+
 
 # 모델 설정
 if "openai_model" not in st.session_state:
