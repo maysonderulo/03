@@ -3,7 +3,7 @@ import streamlit as st
 
 # 상수로 API 키 설정
 client = OpenAI(
-  api_key=os.environ['OPENAI_API_KEY'],  # this is also the default, it can be omitted
+  api_key=os.environ['sk-proj-yKWGbnHznn8PZbP1CAkWT3BlbkFJYxluBHJWAz70PgHY4sMC'],  # this is also the default, it can be omitted
 )
 
 
