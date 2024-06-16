@@ -1,15 +1,18 @@
 from openai import OpenAI
+import os
 import streamlit as st
 
 # 상수로 API 키 설정
 client = OpenAI(
-  api_key=os.environ['sk-proj-yKWGbnHznn8PZbP1CAkWT3BlbkFJYxluBHJWAz70PgHY4sMC'],  # this is also the default, it can be omitted
+  api_key=os.environ['OPENAI_API_KEY'],  # this is also the default, it can be omitted
 )
 
 
 # 모델 설정
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-3.5-turbo"
+openai.api_key = 'sk-proj-NfP5x1XHi3NvGnKvkCloT3BlbkFJOX6owha7okWRIVhbIYPo'
+
 
 # 시스템 메시지 설정
 system_message = '''
