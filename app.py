@@ -1,57 +1,29 @@
 from openai import OpenAI
-import os
 import streamlit as st
 
-# 상수로 API 키 설정
-client = OpenAI(
-  api_key=os.environ['OPENAI_API_KEY'],  # this is also the default, it can be omitted
-)
+with st.sidebar:
+    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+    "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
+    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
 
-
-# 모델 설정
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
-openai.api_key = 'sk-proj-NfP5x1XHi3NvGnKvkCloT3BlbkFJOX6owha7okWRIVhbIYPo'
-
-
-# 시스템 메시지 설정
-system_message = '''
-너는 부경대학교 학생의 학교생활을 도와주는 친절한 챗봇 '백경이'야. 질문에 답을 할 때 항상 반말로 해줘. 무슨 일이 있어도 반말로 해줘.
-그리고 주어진 데이터 범위 밖의 것들은 미안하지만 모른다고 대답해야 해!.
-'''
-
-# 메시지 상태 초기화
+st.title("💬 Chatbot")
+st.caption("🚀 A Streamlit chatbot powered by OpenAI")
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
-if len(st.session_state.messages) == 0:
-    st.session_state.messages = [{"role": "system", "content": system_message}]
+for msg in st.session_state.messages:
+    st.chat_message(msg["role"]).write(msg["content"])
 
-# 메시지 출력
-for idx, message in enumerate(st.session_state.messages):
-    if idx > 0:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+if prompt := st.chat_input():
+    if not openai_api_key:
+        st.info("Please add your OpenAI API key to continue.")
+        st.stop()
 
-# 사용자 입력 처리
-if prompt := st.chat_input("안녕, 나는 대학 생활을 도와주는 백경이야. 뭘 도와줄까?"):
+    client = OpenAI(api_key=openai_api_key)
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        response = openai.ChatCompletion.create(
-            model=st.session_state["openai_model"],
-            messages=st.session_state.messages,
-            stream=False
-        ).choices[0].message['content']
-        st.markdown(response)
-    st.session_state.messages.append({"role": "assistant", "content": response})
-
-# 버튼으로 대화 초기화
-if st.button("Clear"):
-    st.session_state.messages = [{"role": "system", "content": system_message}]
-
-# 버튼으로 대화 종료
-if st.button("Exit Chat"):
-    del st.session_state.messages
+    st.chat_message("user").write(prompt)
+    response = client.chat.completions.create(model="gpt-3.5-turbo", messages=st.session_state.messages)
+    msg = response.choices[0].message.content
+    st.session_state.messages.append({"role": "assistant", "content": msg})
+    st.chat_message("assistant").write(msg)
